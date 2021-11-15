@@ -1,7 +1,6 @@
 import React, { Component } from "react";
-import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { Card } from "react-native-elements";
-import { View, Text } from "react-native";
+import { View, Text, FlatList, ScrollView } from "react-native";
 import { ListItem } from "react-native-elements";
 import { PARTNERS } from "../shared/partners";
 
