@@ -1,8 +1,15 @@
 import React, { Component } from "react";
-import { Card } from "react-native-elements";
-import { View, Text, FlatList, ScrollView } from "react-native";
-import { ListItem } from "react-native-elements";
-import { PARTNERS } from "../shared/partners";
+import { Card, ListItem } from "react-native-elements";
+import { Text, FlatList, ScrollView } from "react-native";
+import { connect } from 'react-redux';
+import { baseUrl } from '../shared/baseUrl';
+import Loading from "./LoadingComponent";
+
+const mapStateToProps = state => {
+    return {
+        partners: state.partners
+    };
+};
 
 function Mission (){
     return (
@@ -20,43 +27,65 @@ function Mission (){
 }
 
 class About extends Component {
-    //set up a constructor to get partner info
-    constructor(props){
-        super(props);
-        this.state = {
-            partners: PARTNERS
-        };
-    }
 
     static navigationOptions = {
         title: 'About Us'
     }
 
 
-
     render(){
-        const { navigate } = this.props.navigation;
-        const renderDirectoryItem = ({item}) => {
+        const renderPartner = ({item}) => {
             return (
                 <ListItem
                     title={item.name}
                     subtitle={item.description}
-                    leftAvatar={{ source: require('./images/bootstrap-logo.png')}}
+                    leftAvatar={{source: {uri: baseUrl + item.image}}}
                 />
             );
         };
+        // const { navigate } = this.props.navigation;
+        // const renderDirectoryItem = ({item}) => {
+        //     return (
+        //         <ListItem
+        //             title={item.name}
+        //             subtitle={item.description}
+        //             leftAvatar={{source: {uri: baseUrl + item.image}}}
+        //         />
+        //     );
+        // };
+
+        if (this.props.partners.isLoading) {
+            return (
+                <ScrollView>
+                    <Mission />
+                    <Card
+                        title='Community Partners'>
+                        <Loading />
+                    </Card>
+                </ScrollView>
+            );
+        }
+        if (this.props.partners.errMess) {
+            return (
+                <ScrollView>
+                    <Mission />
+                    <Card
+                        title='Community Partners'>
+                        <Text>{this.props.partners.errMess}</Text>
+                    </Card>
+                </ScrollView>
+            );
+        }
 
         return (
             <ScrollView>
                 <Mission />
                 <Card title="Community Partners" wrapperStyle={{margin: 20}}>
-                    <FlatList
-                        data={this.state.partners}
+                    <FlatList 
+                        data={this.props.partners.partners}
+                        renderItem={renderPartner}
                         keyExtractor={item => item.id.toString()}
-                        renderItem={renderDirectoryItem} 
-                    >
-
-                    </FlatList>
+                    />
                 </Card>
             </ScrollView>
         
@@ -64,4 +93,4 @@ class About extends Component {
     }
 }
 
-export default About;
+export default connect(mapStateToProps)(About);
