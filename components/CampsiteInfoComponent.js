@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, FlatList, Modal, Button, StyleSheet, Alert, PanResponder } from 'react-native';
+import { Text, View, ScrollView, FlatList, Modal, Button, StyleSheet, Alert, PanResponder, Share } from 'react-native';
 import { Card, Icon, Input, Rating } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
@@ -20,12 +20,16 @@ const mapDispatchToProps = {
     postComment: (campsiteId, rating, author, text) => (postComment(campsiteId, rating, author, text)) 
 };
 
+
+
 function RenderCampsite(props) {
     const {campsite} = props;
 
     const view = React.createRef();
 
     const recognizeDrag = ({dx}) => (dx < -200) ? true : false;
+
+    const recognizeComment = ({dx}) => (dx > 200) ? true : false;
 
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
@@ -54,9 +58,31 @@ function RenderCampsite(props) {
                     { cancelable: false }
                 );
             }
-            return true;
+            else if (recognizeComment(gestureState)){
+                console.log('showComment Modal');
+                props.onShowModal();
+
+            }
+
+            else {
+                return true;
+            }
+
+            
         }
+
     });
+
+    const shareCampsite = (title, message, url) => {
+        Share.share({
+            title: title,
+            message: `${title}: ${message} ${url}`,
+            url: url
+        },{
+            dialogTitle: 'Share ' + title
+        });
+    };
+
 
 
     if (campsite) {
@@ -90,6 +116,14 @@ function RenderCampsite(props) {
                             raised
                             reverse
                             onPress={() => props.onShowModal()}
+                        />
+                        <Icon
+                            name={'share'}
+                            type='font-awesome'
+                            color='#5637DD'
+                            raised
+                            reverse
+                            onPress={() => shareCampsite(campsite.name, campsite.description, baseUrl + campsite.image)} 
                         />
                     </View>
                 </Card>
@@ -140,8 +174,6 @@ class CampsiteInfo extends Component {
             rating: 5,
             author: "",
             text: ""
-            // //Pass event handler?
-            // onShowModal: {() =>this.toggleModal()}
         }       
     
     }
